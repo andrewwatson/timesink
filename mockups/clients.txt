@@ -1,0 +1,31 @@
+╔══════════════════════════════════════════════════════════════╗
+║ timesink > Clients                                           ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  Search: ________                            [N]ew Client    ║
+║                                                              ║
+║  ┌──────────────────────────────────────────────────────────┐║
+║  │ ▸ Cox Automotive                                         │║
+║  │   Rate: $150/hr  │  This month: 86.5h  │  $12,975.00    │║
+║  │   Contact: security-team@coxautoinc.com                  │║
+║  │   Last invoice: Jan 31, 2026 (#INV-2026-004)            │║
+║  │                                                          │║
+║  │ ▸ Waymo                                                  │║
+║  │   Rate: $175/hr  │  This month: 12.0h  │  $2,100.00     │║
+║  │   Contact: contracts@waymo.com                           │║
+║  │   Last invoice: Dec 15, 2025 (#INV-2025-012)            │║
+║  │                                                          │║
+║  │ ▸ Bug Bounty Programs                                    │║
+║  │   Rate: Variable │  This month: 8.5h   │  (Unbilled)    │║
+║  │   Notes: HackerOne + Bugcrowd research                   │║
+║  │                                                          │║
+║  │ ▸ Internal / Admin                                       │║
+║  │   Rate: N/A      │  This month: 4.5h   │  (Non-billable)│║
+║  │   Notes: Invoicing, timekeeping, admin                   │║
+║  └──────────────────────────────────────────────────────────┘║
+║                                                              ║
+║  [↑↓] Navigate  [Enter] Details  [E]dit  [A]rchive          ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║ [←] Back                                                [Q]uit║
+╚══════════════════════════════════════════════════════════════╝

@@ -1,0 +1,26 @@
+╔══════════════════════════════════════════════════════════════╗
+║ timesink v0.1.0                    Week of Feb 3-9, 2026     ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  This Week:  32.5 hrs        Billable:  $4,875.00          ║
+║  Today:       4.0 hrs        Outstanding: $12,340.00        ║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║  Active Timers                                               ║
+║  ┌──────────────────────────────────────────────────────────┐║
+║  │ ● Cox Automotive - Security Audit        [02:34:12]     │║
+║  │   Started: 9:45 AM                                       │║
+║  └──────────────────────────────────────────────────────────┘║
+║                                                              ║
+║  Recent Entries (Last 7 days)                                ║
+║  ┌──────────────────────────────────────────────────────────┐║
+║  │ Feb 5  Cox Automotive     4.5h  Security code review    │║
+║  │ Feb 4  Waymo RFP          2.0h  Proposal preparation    │║
+║  │ Feb 4  Cox Automotive     6.0h  Legacy PHP audit        │║
+║  │ Feb 3  Internal/Admin     1.5h  Invoice generation      │║
+║  │ Feb 3  Cox Automotive     8.0h  Microservices review    │║
+║  └──────────────────────────────────────────────────────────┘║
+║                                                              ║
+╠══════════════════════════════════════════════════════════════╣
+║ [T]imer  [E]ntries  [C]lients  [I]nvoices  [R]eports  [Q]uit║
+╚══════════════════════════════════════════════════════════════╝
