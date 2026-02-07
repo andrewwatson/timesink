@@ -2,7 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/andy/timesink/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -14,15 +16,8 @@ var tuiCmd = &cobra.Command{
 }
 
 func launchTUI(cmd *cobra.Command, args []string) {
-	// TODO: Implement TUI launcher once TUI package is ready
-	fmt.Println("TUI not yet implemented - coming soon!")
-	fmt.Println()
-	fmt.Println("For now, use CLI commands:")
-	fmt.Println("  timesink timer start <client> <description>")
-	fmt.Println("  timesink timer stop")
-	fmt.Println("  timesink clients list")
-	fmt.Println("  timesink entries list")
-	fmt.Println("  timesink invoices list")
-	fmt.Println()
-	fmt.Println("Run 'timesink --help' for more commands")
+	if err := tui.Run(appInstance); err != nil {
+		fmt.Fprintf(os.Stderr, "Error running TUI: %v\n", err)
+		os.Exit(1)
+	}
 }

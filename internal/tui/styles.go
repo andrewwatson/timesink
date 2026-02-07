@@ -14,14 +14,22 @@ var (
 	// Base styles
 	titleStyle    = lipgloss.NewStyle().Bold(true).Foreground(primaryColor)
 	subtitleStyle = lipgloss.NewStyle().Foreground(mutedColor)
+	helpStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("117")) // Bright cyan
 	selectedStyle = lipgloss.NewStyle().Bold(true).Background(primaryColor).Foreground(lipgloss.Color("0"))
 
 	// Box styles
 	boxStyle = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(1)
 
+	// Layout
+	borderColor    = lipgloss.Color("63") // Soft purple
+	appBorderStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(borderColor).
+			Padding(1, 2)
+
 	// Header/Footer
-	headerStyle = lipgloss.NewStyle().Bold(true).Padding(0, 1)
-	footerStyle = lipgloss.NewStyle().Foreground(mutedColor)
+	headerStyle = lipgloss.NewStyle().Bold(true).Foreground(primaryColor).Padding(0, 1)
+	footerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("226")).Bold(true) // Bright yellow
 
 	// Timer specific
 	timerRunningStyle = lipgloss.NewStyle().Bold(true).Foreground(successColor)

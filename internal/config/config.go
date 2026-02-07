@@ -60,7 +60,7 @@ func DefaultConfig() *Config {
 		Invoice: InvoiceConfig{
 			DefaultDueDays: 30,
 			DefaultTaxRate: 0.0,
-			OutputDir:      filepath.Join(homeDir, ".config", "timesink", "invoices"),
+			OutputDir:      ".",
 			NumberPrefix:   "INV",
 		},
 		User: UserConfig{

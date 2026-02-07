@@ -83,8 +83,8 @@ func (r *InvoiceRepo) GetByID(ctx context.Context, id int64) (*domain.Invoice, e
 	`
 
 	invoice := &domain.Invoice{}
-	var periodStart, periodEnd, createdAt, updatedAt, status string
-	var dueDate, paidDate sql.NullString
+	var periodStart, periodEnd, status string
+	var dueDate, paidDate, createdAt, updatedAt sql.NullString
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&invoice.ID,
@@ -127,8 +127,8 @@ func (r *InvoiceRepo) GetByNumber(ctx context.Context, number string) (*domain.I
 	`
 
 	invoice := &domain.Invoice{}
-	var periodStart, periodEnd, createdAt, updatedAt, status string
-	var dueDate, paidDate sql.NullString
+	var periodStart, periodEnd, status string
+	var dueDate, paidDate, createdAt, updatedAt sql.NullString
 
 	err := r.db.QueryRowContext(ctx, query, number).Scan(
 		&invoice.ID,
@@ -192,8 +192,8 @@ func (r *InvoiceRepo) List(ctx context.Context, clientID *int64, status *domain.
 	invoices := make([]*domain.Invoice, 0)
 	for rows.Next() {
 		invoice := &domain.Invoice{}
-		var periodStart, periodEnd, createdAt, updatedAt, statusStr string
-		var dueDate, paidDate sql.NullString
+		var periodStart, periodEnd, statusStr string
+		var dueDate, paidDate, createdAt, updatedAt sql.NullString
 
 		err := rows.Scan(
 			&invoice.ID,

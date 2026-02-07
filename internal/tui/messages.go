@@ -1,11 +1,5 @@
 package tui
 
-import (
-	"time"
-
-	tea "github.com/charmbracelet/bubbletea"
-)
-
 // SwitchScreenMsg requests a screen change
 type SwitchScreenMsg struct {
 	Screen Screen
@@ -19,12 +13,12 @@ type ErrorMsg struct {
 	Err error
 }
 
-// TimerTickMsg is sent every second when timer is running
-type TimerTickMsg struct{}
+// OpenNewClientFormMsg tells the clients screen to open the new client form
+type OpenNewClientFormMsg struct{}
 
-// tickTimer returns a command that sends TimerTickMsg every second
-func tickTimer() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
-		return TimerTickMsg{}
-	})
+// firstRunCheckMsg reports whether the database has any clients
+type firstRunCheckMsg struct {
+	hasClients bool
 }
+
+// (Timer ticks are managed by individual screen implementations as needed)

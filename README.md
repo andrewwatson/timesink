@@ -1,267 +1,182 @@
 # timesink
 
-> A delightfully ironic CLI time tracker for freelancers and contractors who bill by the hour
+A keyboard-driven CLI time tracker for freelancers who bill by the hour.
 
-`timesink` is a terminal-based time tracking utility with a keyboard-driven TUI for managing clients, timesheets, and invoices. Because tracking your time shouldn't waste your time.
-
-## Features
-
-- **Live timers** - Start/stop/pause timers with a single keystroke
-- **Client management** - Track multiple clients with custom hourly rates
-- **Time entries** - Manual entry and editing of time logs
-- **Invoice generation** - Create professional invoices from time entries
-- **Reports & statistics** - Weekly/monthly summaries and billable analytics
-- **Fully keyboard-driven** - No mouse required, navigate everything with hotkeys
-- **ASCII art TUI** - Because we're professionals with a sense of humor
-
-## Screenshots
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║ timesink v0.1.0                    Week of Feb 3-9, 2026     ║
-╠══════════════════════════════════════════════════════════════╣
-║                                                              ║
-║  This Week:  32.5 hrs        Billable:  $4,875.00          ║
-║  Today:       4.0 hrs        Outstanding: $12,340.00        ║
-║                                                              ║
-║  Active Timers                                               ║
-║  ● Cox Automotive - Security Audit        [02:34:12]        ║
-║                                                              ║
-╠══════════════════════════════════════════════════════════════╣
-║ [T]imer  [E]ntries  [C]lients  [I]nvoices  [R]eports  [Q]uit║
-╚══════════════════════════════════════════════════════════════╝
-```
-
-See the [mockups directory](./mockups) for full UI designs.
+`timesink` is a terminal-based time tracking tool with an interactive TUI for managing clients, tracking time, generating invoices, and reviewing reports. All data is stored locally in an encrypted SQLite database.
 
 ## Installation
 
+### Prerequisites
+- Go 1.24 or higher
+- A C compiler (for SQLite/sqlcipher)
+
+### From source
+
 ```bash
-# From source
 git clone https://github.com/andrewwatson/timesink.git
 cd timesink
 go build -o timesink ./cmd/timesink
-
-# Install globally
-go install github.com/andrewwatson/timesink/cmd/timesink@latest
 ```
 
 ## Quick Start
 
 ```bash
-# Start timesink
-timesink
+# Launch the interactive TUI (default)
+./timesink
 
-# Or start a timer directly from the command line
-timesink start "Client Name" "Task description"
-
-# Stop the active timer
-timesink stop
-
-# View today's time entries
-timesink today
-
-# Generate an invoice
-timesink invoice create --client "Client Name" --period "2026-02"
+# Or use CLI commands directly
+./timesink timer start "Acme Corp" "API integration"
+./timesink timer stop
+./timesink entries list
 ```
 
-## Usage
+On first run, you'll be prompted to set a password for database encryption. This password is stored in your system keyring.
 
-### Interactive TUI Mode
+## Interactive TUI
 
-Just run `timesink` with no arguments to launch the interactive interface:
+Run `timesink` with no arguments to launch the full-screen terminal interface.
+
+### Navigation
+
+| Key | Screen |
+|-----|--------|
+| `T` | Timer - start, stop, pause timers |
+| `E` | Entries - view and create time entries |
+| `C` | Clients - manage clients and rates |
+| `I` | Invoices - generate and view invoices |
+| `R` | Reports - weekly/monthly summaries |
+| `S` | Settings - configure invoice defaults |
+| `Q` | Quit |
+
+### Common Actions
+
+- `j`/`k` or arrow keys to navigate lists
+- `n` to create new items (entries, clients, invoices)
+- `Enter` to select or view details
+- `Esc` to go back
+- `Tab`/`Shift+Tab` to move between form fields
+- `Ctrl+S` to save forms
+
+### Timer
+
+Start a timer for a client, then stop it to save a time entry. The timer persists if you quit and relaunch. You cannot quit while a timer is running — stop or discard it first.
+
+### Invoices
+
+Press `n` on the invoices screen to generate an invoice:
+1. Select a client with unbilled time
+2. Preview the entries and totals
+3. Choose where to save the .txt file
+4. The invoice is finalized and entries are locked
+
+### Manual Entries
+
+Press `n` on the entries screen to add a time entry manually:
+1. Pick a client (or auto-selected if you only have one)
+2. Fill in date, start/end times, description, and rate
+3. The rate is pre-filled from the client's hourly rate
+
+## CLI Commands
+
+### Timer
 
 ```bash
-timesink
+timesink timer start <client> [description]
+timesink timer stop
+timesink timer pause
+timesink timer resume
+timesink timer discard
+timesink timer status
 ```
 
-**Main Menu Hotkeys:**
-- `T` - Timer management
-- `E` - View/edit time entries
-- `C` - Client management
-- `I` - Invoices
-- `R` - Reports and statistics
-- `Q` - Quit
-
-### Command Line Mode
-
-For quick operations without launching the full TUI:
+### Clients
 
 ```bash
-# Timer operations
-timesink start <client> [description]
-timesink stop
-timesink pause
-timesink resume
-timesink status
-
-# Time entries
-timesink log <client> <hours> [description]
-timesink today
-timesink week
-timesink month
-
-# Client management
-timesink client add <name> --rate <hourly_rate>
-timesink client list
-timesink client edit <name>
-
-# Invoicing
-timesink invoice create --client <name> --start <date> --end <date>
-timesink invoice list
-timesink invoice export <invoice_id> --format pdf
-
-# Reports
-timesink report weekly
-timesink report monthly
-timesink report client <name>
+timesink clients list [--archived]
+timesink clients add <name> --rate <rate> [--email <email>] [--notes <notes>]
+timesink clients edit <id> [--name <name>] [--rate <rate>]
+timesink clients archive <id>
+timesink clients unarchive <id>
 ```
+
+### Entries
+
+```bash
+timesink entries list [--client <id>] [--start <date>] [--end <date>]
+timesink entries add <client> <start_time> <end_time> <description> [--rate <rate>]
+timesink entries edit <id> --description <desc> --reason <reason>
+timesink entries delete <id> --reason <reason>
+timesink entries history <id>
+```
+
+### Invoices
+
+```bash
+timesink invoices list [--client <id>] [--status <status>]
+timesink invoices create <client> [--start <date>] [--end <date>]
+timesink invoices add-entries <invoice_id> <entry_ids...> [--tax <rate>]
+timesink invoices remove-entry <invoice_id> <entry_id>
+timesink invoices finalize <id>
+timesink invoices mark-sent <id>
+timesink invoices mark-paid <id> [--date <date>]
+timesink invoices show <id>
+```
+
+### Reset Data
+
+```bash
+timesink reset entries     # Delete all entries, invoices, and timer state
+timesink reset invoices    # Delete all invoices and unlock time entries
+timesink reset all         # Delete everything including clients
+```
+
+All reset commands prompt for confirmation before executing.
 
 ## Configuration
 
-`timesink` stores its data in `~/.config/timesink/`:
+Data is stored in `~/.config/timesink/`:
 
 ```
 ~/.config/timesink/
 ├── config.yaml       # User preferences
-├── timesink.db      # SQLite database with all data
-└── invoices/        # Generated invoice PDFs
+└── timesink.db       # Encrypted SQLite database
 ```
 
 ### config.yaml
 
+Editable via the Settings screen (`S`) in the TUI, or by editing the file directly:
+
 ```yaml
-# Default hourly rate (if not set per-client)
-default_rate: 150.00
+database:
+  path: ~/.config/timesink/timesink.db
 
-# Invoice settings
 invoice:
-  your_name: "Your Name"
-  your_email: "you@example.com"
-  your_address: |
-    123 Main Street
-    Athens, GA 30601
-  tax_rate: 0.0
-  payment_terms: "Net 30"
-  invoice_prefix: "INV"
+  default_due_days: 30
+  default_tax_rate: 0.0
+  output_dir: "."
+  number_prefix: "INV"
 
-# Display preferences
-display:
-  currency: "USD"
-  date_format: "2006-01-02"
-  time_format: "3:04 PM"
-  theme: "classic"  # classic, minimal, cyberpunk
+user:
+  name: ""
+  email: ""
+  address: ""
+  phone: ""
 ```
 
-## Data Model
+| Setting | Description |
+|---------|-------------|
+| `invoice.output_dir` | Directory for exported invoice .txt files (default: current directory) |
+| `invoice.number_prefix` | Prefix for invoice numbers, e.g. `INV` produces `INV-2026-001` |
+| `invoice.default_due_days` | Days until invoice is due (default: 30) |
+| `invoice.default_tax_rate` | Tax rate as decimal, e.g. `0.0825` for 8.25% (default: 0) |
+| `user.*` | Your info shown on generated invoices |
 
-### Clients
-- Name, contact info, hourly rate
-- Active/archived status
-- Notes and metadata
+## Security
 
-### Time Entries
-- Start/end timestamps
-- Client reference
-- Task description
-- Billable flag
-- Hourly rate (captured at time of entry)
-
-### Invoices
-- Invoice number (auto-generated)
-- Client reference
-- Date range
-- Line items (from time entries)
-- Status (draft, sent, paid, overdue)
-- Payment details
-
-## Development
-
-### Prerequisites
-- Go 1.21 or higher
-- SQLite3
-
-### Building from source
-
-```bash
-git clone https://github.com/yourusername/timesink.git
-cd timesink
-go mod download
-go build -o timesink ./cmd/timesink
-```
-
-### Running tests
-
-```bash
-go test ./...
-```
-
-### Project structure
-
-```
-timesink/
-├── cmd/
-│   └── timesink/          # Main entry point
-│       └── main.go
-├── internal/
-│   ├── db/                # Database layer (SQLite)
-│   ├── models/            # Domain models
-│   ├── tui/               # Terminal UI components
-│   ├── timer/             # Timer logic
-│   ├── invoice/           # Invoice generation
-│   └── reports/           # Reports and analytics
-├── mockups/               # ASCII UI mockups
-├── go.mod
-├── go.sum
-└── README.md
-```
-
-## Roadmap
-
-- [x] ASCII mockups and design
-- [ ] Core data models and SQLite schema
-- [ ] Basic CLI commands (start, stop, log)
-- [ ] Interactive TUI with keyboard navigation
-- [ ] Client management
-- [ ] Time entry CRUD operations
-- [ ] Invoice generation (PDF export)
-- [ ] Reports and statistics
-- [ ] Configuration file support
-- [ ] Data export (CSV, JSON)
-- [ ] Timer notifications
-- [ ] Multi-currency support
-- [ ] Cloud sync (optional)
-
-## Contributing
-
-Contributions welcome! This is a personal project but I'm happy to review PRs.
-
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- The database is encrypted with [SQLCipher](https://www.zetetic.net/sqlcipher/)
+- Your encryption password is stored in the system keyring (macOS Keychain, etc.)
+- No data leaves your machine
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Why "timesink"?
-
-Because naming things is hard, and irony is easy. Also because time tracking tools often become the very thing they're supposed to prevent: a huge waste of time. This one aims to be different.
-
-## Author
-
-Built with ☕ by a developer who bills by the hour and got tired of spreadsheets.
-
----
-
-**Pro tip:** Set up a shell alias for quick timer operations:
-
-```bash
-alias ts='timesink'
-alias tstart='timesink start'
-alias tstop='timesink stop'
-```
-
-Now you can just `tstart "Cox Auto" "security audit"` and get back to work.
+MIT

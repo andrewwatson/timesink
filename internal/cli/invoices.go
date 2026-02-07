@@ -336,6 +336,40 @@ var invoicesShowCmd = &cobra.Command{
 	},
 }
 
+var invoicesRemoveEntryCmd = &cobra.Command{
+	Use:   "remove-entry [invoice_id] [entry_id]",
+	Short: "Remove a time entry from a draft invoice",
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
+		invoiceID, err := strconv.ParseInt(args[0], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid invoice ID: %w", err)
+		}
+
+		entryID, err := strconv.ParseInt(args[1], 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid entry ID: %w", err)
+		}
+
+		if err := appInstance.InvoiceService.RemoveEntryFromInvoice(ctx, invoiceID, entryID); err != nil {
+			return fmt.Errorf("failed to remove entry from invoice: %w", err)
+		}
+
+		fmt.Printf("✓ Removed entry %d from invoice %d\n", entryID, invoiceID)
+		// Show updated invoice totals
+		invoice, _ := appInstance.InvoiceService.GetInvoice(ctx, invoiceID)
+		if invoice != nil {
+			fmt.Printf("  Subtotal: $%.2f\n", invoice.Subtotal)
+			fmt.Printf("  Tax: $%.2f\n", invoice.TaxAmount)
+			fmt.Printf("  Total: $%.2f\n", invoice.Total)
+		}
+
+		return nil
+	},
+}
+
 func init() {
 	invoicesCmd.AddCommand(invoicesListCmd)
 	invoicesCmd.AddCommand(invoicesCreateCmd)
@@ -344,6 +378,7 @@ func init() {
 	invoicesCmd.AddCommand(invoicesMarkSentCmd)
 	invoicesCmd.AddCommand(invoicesMarkPaidCmd)
 	invoicesCmd.AddCommand(invoicesShowCmd)
+	invoicesCmd.AddCommand(invoicesRemoveEntryCmd)
 
 	// List flags
 	invoicesListCmd.Flags().Int64("client", 0, "Filter by client ID")

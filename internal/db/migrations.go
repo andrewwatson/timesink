@@ -1,7 +1,7 @@
 package db
 
 import (
-    "fmt"
+	"fmt"
 )
 
 type migration struct {

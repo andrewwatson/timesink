@@ -13,6 +13,7 @@ type KeyMap struct {
 	Clients  key.Binding
 	Invoices key.Binding
 	Reports  key.Binding
+	Settings key.Binding
 
 	// Actions
 	Select key.Binding
@@ -36,6 +37,7 @@ var DefaultKeyMap = KeyMap{
 	Clients:  key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "clients")),
 	Invoices: key.NewBinding(key.WithKeys("i"), key.WithHelp("i", "invoices")),
 	Reports:  key.NewBinding(key.WithKeys("r"), key.WithHelp("r", "reports")),
+	Settings: key.NewBinding(key.WithKeys(","), key.WithHelp(",", "settings")),
 	Select:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "select")),
 	New:      key.NewBinding(key.WithKeys("n"), key.WithHelp("n", "new")),
 	Edit:     key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit")),

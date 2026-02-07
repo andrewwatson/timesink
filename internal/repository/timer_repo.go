@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/andy/timesink/internal/db"
 	"github.com/andy/timesink/internal/domain"

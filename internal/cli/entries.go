@@ -267,9 +267,9 @@ var entriesHistoryCmd = &cobra.Command{
 
 		fmt.Printf("Edit History for Entry #%d:\n\n", id)
 		for _, h := range history {
-			fmt.Printf("%s - %s\n", h.ChangedAt.Format("2006-01-02 15:04:05"), h.ChangeType)
-			if h.Reason != "" {
-				fmt.Printf("  Reason: %s\n", h.Reason)
+			fmt.Printf("%s - %s\n", h.ChangedAt.Format("2006-01-02 15:04:05"), h.FieldName)
+			if h.ChangeReason != "" {
+				fmt.Printf("  Reason: %s\n", h.ChangeReason)
 			}
 			fmt.Println()
 		}

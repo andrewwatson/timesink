@@ -37,4 +37,5 @@ func init() {
 	rootCmd.AddCommand(entriesCmd)
 	rootCmd.AddCommand(invoicesCmd)
 	rootCmd.AddCommand(tuiCmd)
+	rootCmd.AddCommand(resetCmd)
 }
