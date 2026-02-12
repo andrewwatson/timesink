@@ -21,6 +21,7 @@ const (
 	entryModePickClient              // cursor-based client selection
 	entryModeNew                     // text input form for entry details
 	entryModeConfirmDelete           // y/n confirmation before delete
+	entryModeEditDesc                // inline description editing
 )
 
 // entry form field indices (after client is selected)
@@ -52,6 +53,9 @@ type EntriesModel struct {
 	formClients []*domain.Client
 	formClient  *domain.Client // selected client
 	clientCursor int
+
+	// Inline description editing
+	descInput textinput.Model
 }
 
 type entriesDataMsg struct {
@@ -73,9 +77,13 @@ type entryDeletedMsg struct {
 	err error
 }
 
+type entryDescUpdatedMsg struct {
+	err error
+}
+
 // IsCapturingInput returns true when the text form or delete confirmation is active
 func (m *EntriesModel) IsCapturingInput() bool {
-	return m.mode == entryModeNew || m.mode == entryModeConfirmDelete
+	return m.mode == entryModeNew || m.mode == entryModeConfirmDelete || m.mode == entryModeEditDesc
 }
 
 // NewEntriesModel creates a new entries screen model
@@ -283,6 +291,8 @@ func (m *EntriesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateForm(msg)
 	case entryModeConfirmDelete:
 		return m.updateConfirmDelete(msg)
+	case entryModeEditDesc:
+		return m.updateEditDesc(msg)
 	}
 
 	switch msg := msg.(type) {
@@ -325,6 +335,22 @@ func (m *EntriesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case msg.String() == "n":
 			m.loading = true
 			return m, m.loadFormClients()
+		case msg.String() == "enter":
+			if len(m.entries) > 0 && m.cursor < len(m.entries) {
+				entry := m.entries[m.cursor]
+				if entry.IsLocked() {
+					m.err = fmt.Errorf("cannot edit: entry is locked by an invoice")
+					return m, nil
+				}
+				ti := textinput.New()
+				ti.Placeholder = "Enter description..."
+				ti.SetValue(entry.Description)
+				ti.CharLimit = 200
+				ti.Width = 50
+				m.descInput = ti
+				m.mode = entryModeEditDesc
+				return m, m.descInput.Focus()
+			}
 		case msg.String() == "d":
 			if len(m.entries) > 0 && m.cursor < len(m.entries) {
 				entry := m.entries[m.cursor]
@@ -419,6 +445,42 @@ func (m *EntriesModel) updateForm(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m *EntriesModel) updateEditDesc(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case entryDescUpdatedMsg:
+		if msg.err != nil {
+			m.err = msg.err
+			m.mode = entryModeList
+			return m, nil
+		}
+		m.mode = entryModeList
+		m.statusMsg = "Description updated"
+		m.loading = true
+		return m, m.loadEntries()
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter":
+			entry := m.entries[m.cursor]
+			desc := m.descInput.Value()
+			return m, func() tea.Msg {
+				entry.Description = desc
+				entry.UpdatedAt = time.Now()
+				err := m.app.EntryRepo.Update(context.Background(), entry, "description updated")
+				return entryDescUpdatedMsg{err: err}
+			}
+		case "esc":
+			m.mode = entryModeList
+			return m, nil
+		default:
+			var cmd tea.Cmd
+			m.descInput, cmd = m.descInput.Update(msg)
+			return m, cmd
+		}
+	}
+	return m, nil
+}
+
 func (m *EntriesModel) updateConfirmDelete(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case entryDeletedMsg:
@@ -458,9 +520,25 @@ func (m *EntriesModel) View() string {
 		return m.viewForm()
 	case entryModeConfirmDelete:
 		return m.viewConfirmDelete()
+	case entryModeEditDesc:
+		return m.viewEditDesc()
 	default:
 		return m.viewList()
 	}
+}
+
+func (m *EntriesModel) viewEditDesc() string {
+	entry := m.entries[m.cursor]
+	clientName := m.clientNames[entry.ClientID]
+	date := entry.StartTime.Format("Jan 2")
+	hours := formatHours(entry.Duration().Hours())
+
+	var s string
+	s += titleStyle.Render("Edit Description") + "\n\n"
+	s += fmt.Sprintf("  %s  %s  %s\n\n", date, clientName, hours)
+	s += fmt.Sprintf("  Description: %s\n\n", m.descInput.View())
+	s += helpStyle.Render("  enter: save  esc: cancel") + "\n"
+	return s
 }
 
 func (m *EntriesModel) viewConfirmDelete() string {
@@ -534,7 +612,7 @@ func (m *EntriesModel) viewList() string {
 		fmt.Sprintf("     %-7s  %-20s  %6s  %10s", "Total", "", formatHours(totalHours), formatMoney(totalValue)),
 	) + "\n"
 
-	s += "\n" + helpStyle.Render("  j/k: navigate  n: new entry  d: delete")
+	s += "\n" + helpStyle.Render("  j/k: navigate  n: new entry  enter: edit desc  d: delete")
 
 	return s
 }
@@ -614,10 +692,10 @@ func (m *EntriesModel) renderEntry(entry *domain.TimeEntry, selected bool) strin
 	)
 
 	if selected {
-		return selectedStyle.Render(line)
+		return "  " + selectedStyle.Render(line)
 	}
 	if !entry.IsBillable {
-		return lipgloss.NewStyle().Foreground(mutedColor).Render(line)
+		return "  " + lipgloss.NewStyle().Foreground(mutedColor).Render(line)
 	}
 	return "  " + line
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy/timesink/internal/app"
 	"github.com/andy/timesink/internal/domain"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -40,6 +41,11 @@ func loadClientsCmd(a *app.App) tea.Cmd {
 	}
 }
 
+// descSavedMsg is sent when a description update completes
+type descSavedMsg struct {
+	err error
+}
+
 // TimerModel is a simple screen showing the active timer and controls
 type TimerModel struct {
 	app       *app.App
@@ -48,6 +54,10 @@ type TimerModel struct {
 	client    *domain.Client // current timer's client
 	err       error
 	statusMsg string
+
+	// Description editing
+	editingDesc bool
+	descInput   textinput.Model
 }
 
 // IsCapturingInput returns true when a timer is active so that keys like
@@ -132,9 +142,36 @@ func (m *TimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.timer = t
 		return m, tickTimer()
 
+	case descSavedMsg:
+		if msg.err != nil {
+			m.err = msg.err
+		}
+		return m, nil
+
 	case tea.KeyMsg:
 		m.err = nil
 		m.statusMsg = ""
+
+		// Description editing mode intercepts all keys
+		if m.editingDesc {
+			switch msg.String() {
+			case "enter":
+				desc := m.descInput.Value()
+				m.editingDesc = false
+				m.timer.Description = desc
+				return m, func() tea.Msg {
+					err := m.app.TimerService.UpdateDescription(context.Background(), desc)
+					return descSavedMsg{err: err}
+				}
+			case "esc":
+				m.editingDesc = false
+				return m, nil
+			default:
+				var cmd tea.Cmd
+				m.descInput, cmd = m.descInput.Update(msg)
+				return m, cmd
+			}
+		}
 
 		switch msg.String() {
 		case "1", "2", "3", "4", "5", "6", "7", "8", "9":
@@ -169,6 +206,18 @@ func (m *TimerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "x":
 			if m.timer != nil {
 				return m, m.stopTimer()
+			}
+			return m, nil
+		case "n":
+			if m.timer != nil {
+				ti := textinput.New()
+				ti.Placeholder = "Enter description..."
+				ti.SetValue(m.timer.Description)
+				ti.Width = 40
+				ti.Focus()
+				m.descInput = ti
+				m.editingDesc = true
+				return m, ti.Focus()
 			}
 			return m, nil
 		case "d":
@@ -304,7 +353,10 @@ func (m *TimerModel) View() string {
 	if rate > 0 {
 		b += fmt.Sprintf("Rate: %s/hr\n", formatMoney(rate))
 	}
-	if m.timer.Description != "" {
+	if m.editingDesc {
+		b += fmt.Sprintf("Description: %s\n", m.descInput.View())
+		b += helpStyle.Render("  enter=save, esc=cancel") + "\n"
+	} else if m.timer.Description != "" {
 		b += fmt.Sprintf("Description: %s\n", m.timer.Description)
 	}
 	b += fmt.Sprintf("Started: %s\n", m.timer.StartTime.Format("2006-01-02 15:04:05"))
@@ -313,6 +365,6 @@ func (m *TimerModel) View() string {
 		valueStr := timerValueStyle.Render(formatMoney(valueAccrued))
 		b += fmt.Sprintf("Value accrued: %s\n", valueStr)
 	}
-	b += "\nKeys: p=pause, r=resume, x=stop, d=discard\n"
+	b += "\nKeys: p=pause, r=resume, n=note, x=stop, d=discard\n"
 	return b
 }

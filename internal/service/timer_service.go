@@ -45,6 +45,9 @@ type TimerService interface {
 	// AccruedValue calculates the current value of the active timer
 	AccruedValue(ctx context.Context, hourlyRate float64) (float64, error)
 
+	// UpdateDescription updates the description of the active timer
+	UpdateDescription(ctx context.Context, description string) error
+
 	// RecoverFromCrash checks for an existing timer on startup
 	RecoverFromCrash(ctx context.Context) error
 }
@@ -209,6 +212,19 @@ func (s *timerService) AccruedValue(ctx context.Context, hourlyRate float64) (fl
 
 	hours := elapsed.Hours()
 	return hours * hourlyRate, nil
+}
+
+func (s *timerService) UpdateDescription(ctx context.Context, description string) error {
+	timer, err := s.timerRepo.Get(ctx)
+	if err != nil {
+		return err
+	}
+	if timer == nil {
+		return ErrNoActiveTimer
+	}
+
+	timer.Description = description
+	return s.timerRepo.Save(ctx, timer)
 }
 
 func (s *timerService) RecoverFromCrash(ctx context.Context) error {
